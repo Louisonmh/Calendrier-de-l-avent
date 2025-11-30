@@ -17,67 +17,131 @@
             
             <p id="riddle-text">Chargement...</p>
 
-            <button class="btn" onclick="revealSolution()" style="background-color: var(--secondary-color);">Voir l'indice / Solution</button>
-            <p id="solution" style="display:none; margin-top:15px; color: var(--primary-color); font-weight:bold;"></p>
+            <div id="input-zone" class="input-group">
+                <input type="text" id="user-answer" placeholder="Ta réponse ici..." autocomplete="off">
+                <button class="btn" onclick="checkAnswer()" style="margin-top:0;">Valider</button>
+                <p id="error-message" class="error-msg">Mauvaise réponse, essaie encore ! ❌</p>
+            </div>
 
-            <br>
-            <a href="index.html" class="btn">⬅ Retour au calendrier</a>
+            <button id="action-btn" class="btn" onclick="handleAction()" style="background-color: var(--secondary-color);">Voir la solution</button>
+            
+            <div id="solution" style="display:none; margin-top:20px; border-top: 1px solid #ddd; padding-top:20px;">
+                <p id="solution-text" style="color: var(--primary-color); font-weight:bold; font-size: 1.2rem;"></p>
+                <div id="reward-media"></div>
+            </div>
+
+            <br><br>
+            <a href="index.html" class="btn" style="background-color: #7f8c8d; font-size: 0.8rem;">⬅ Retour au calendrier</a>
         </div>
     </div>
 
     <script>
         const params = new URLSearchParams(window.location.search);
         const day = params.get('jour');
-        
-        // --- TA DATA ---
-        // Tu peux mettre du HTML dans 'text' (ex: <br>, <strong>)
-        // 'image' est optionnel. Tu peux mettre une URL d'image.
+
+        // --- TA CONFIGURATION ---
         const riddles = {
+            // EXEMPLE 1 : Question avec Réponse Obligatoire
             1: {
-                text: "BAHAHAHA J'espere tes choqué ! Voici ton premier défi ! https://www.jigsawplanet.com/?rc=play&pid=1de7c9e6df69",
-                image: "./img/Jour1.jng" // Exemple photo romantique
-                url: "https://www.jigsawplanet.com/?rc=play&pid=1de7c9e6df69", // 👈 Le lien du puzzle
-                buttonText: "Commencer le Puzzle 🧩"
+                text: "BAHAHAHAH j'espere tes choqué ! Voici ton premier defi, puis reviens demain :)",
+                image: "./img/Jour1.png",
+                url: "https://www.jigsawplanet.com/?rc=play&pid=1de7c9e6df69",
+                buttonText: "Faire le Puzzle 🧩"
             },
+
+            // EXEMPLE 2 : Puzzle / Lien externe
             2: {
-                text: "Une petite playlist pour ta journée.",
-                solution: "Pas d'énigme, profite juste de la musique 🎵",
-                // Tu peux insérer une iframe Spotify ici si tu es chaud, sinon juste le lien
-                text: "Clique ici : <a href='https://open.spotify.com/...' target='_blank'>Notre Playlist</a>"
+                text: "Je suis pleine de trous mais je peux retenir l'eau. Qui suis-je ?",
+                code: "eponge", // 👈 LA BONNE RÉPONSE (Mets-la en minuscule, sans accent)
+                solution: "Bravo ! Ton cadeau est caché sous l'évier ! 🧽🎁"
             },
-            // ... Remplis jusqu'à 24
+
+            // EXEMPLE 3 : Classique (Bouton révélation)
+            3: {
+                text: "Petite devinette : Qu'est-ce qui a 13 coeurs mais aucun autre organe ?",
+                solution: "Un jeu de cartes ! (On joue ce soir ?)"
+            }
         };
 
+        // --- LOGIQUE (NE PAS TOUCHER) ---
         const content = riddles[day];
+        
+        // Éléments HTML
         const titleEl = document.getElementById('day-title');
         const textEl = document.getElementById('riddle-text');
-        const solEl = document.getElementById('solution');
+        const solContainer = document.getElementById('solution');
+        const solText = document.getElementById('solution-text');
+        const inputZone = document.getElementById('input-zone');
+        const actionBtn = document.getElementById('action-btn');
+        const errorMsg = document.getElementById('error-message');
+        const inputField = document.getElementById('user-answer');
         const mediaEl = document.getElementById('media-container');
 
-        if (content.url) {
-                // CAS 1 : C'est un lien (Puzzle, Jeu...)
-                btn.innerText = content.buttonText || "Accéder au lien"; // Change le texte
-                btn.onclick = function() {
-                    window.open(content.url, '_blank'); // Ouvre le lien dans un nouvel onglet
-                };
-                // On cache la zone de texte solution car elle ne sert à rien ici
-                solEl.style.display = 'none'; 
-            } else {
-                // CAS 2 : C'est une énigme classique (Texte caché)
-                btn.innerText = "Voir l'indice / Solution";
-                solEl.innerText = content.solution;
-                
-                btn.onclick = function() {
-                    // Toggle simple
-                    solEl.style.display = (solEl.style.display === 'none') ? 'block' : 'none';
-                };
-            }  textEl.innerText = "Pas de contenu pour ce jour.";
+        if (content) {
+            titleEl.innerText = `Jour ${day}`;
+            textEl.innerHTML = content.text;
+
+            // Gestion Image Principale
+            if (content.image) {
+                mediaEl.innerHTML = `<img src="${content.image}" style="max-width:100%; border-radius:10px;">`;
+            }
+
+            // MODE 1 : Il y a un CODE à trouver
+            if (content.code) {
+                actionBtn.style.display = 'none'; // Cache le gros bouton
+                inputZone.style.display = 'block'; // Affiche le champ texte
+            }
+            // MODE 2 : C'est un LIEN
+            else if (content.url) {
+                actionBtn.innerText = content.buttonText || "Ouvrir le lien";
+            }
+            // MODE 3 : Classique
+            else {
+                actionBtn.innerText = "Voir la réponse";
+            }
+
+        } else {
+            titleEl.innerText = "Oups";
+            textEl.innerText = "Pas d'énigme pour ce jour.";
+            actionBtn.style.display = 'none';
         }
 
-        function revealSolution() {
-            const s = document.getElementById('solution');
-            s.style.display = (s.style.display === 'none') ? 'block' : 'none';
+        // Fonction pour valider la réponse écrite
+        function checkAnswer() {
+            const userRep = inputField.value.toLowerCase().trim(); // On met en minuscule et on enlève les espaces
+            const correctRep = content.code.toLowerCase().trim();
+
+            if (userRep === correctRep) {
+                // VICTOIRE
+                inputZone.style.display = 'none'; // Cache le champ
+                solContainer.style.display = 'block'; // Affiche la solution
+                solText.innerHTML = content.solution;
+                createConfettis(); // Bonus : petite animation si tu veux
+            } else {
+                // ERREUR
+                errorMsg.style.display = 'block';
+                inputField.style.border = "2px solid red";
+            }
         }
+
+        // Fonction du bouton principal (Lien ou Révélation)
+        function handleAction() {
+            if (content.url) {
+                window.open(content.url, '_blank');
+            } else {
+                solContainer.style.display = 'block';
+                solText.innerHTML = content.solution;
+                actionBtn.style.display = 'none'; // Cache le bouton après clic
+            }
+        }
+        
+        // Bonus : Permet de valider avec la touche "Entrée"
+        inputField.addEventListener("keypress", function(event) {
+            if (event.key === "Enter") {
+                checkAnswer();
+            }
+        });
+
     </script>
 </body>
 </html>

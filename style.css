@@ -131,3 +131,34 @@ h1, h2 {
     0% { background-position: 0 0, 0 0, 0 0; }
     100% { background-position: 500px 1000px, 400px 400px, 300px 300px; }
 }
+
+/* Champ de réponse */
+.input-group {
+    margin: 20px 0;
+    display: none; /* Caché par défaut */
+}
+
+input[type="text"] {
+    padding: 10px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    font-size: 1rem;
+    width: 70%;
+    margin-right: 5px;
+}
+
+.error-msg {
+    color: #c0392b;
+    font-weight: bold;
+    margin-top: 10px;
+    display: none;
+    animation: shake 0.5s;
+}
+
+@keyframes shake {
+    0% { transform: translateX(0); }
+    25% { transform: translateX(-5px); }
+    50% { transform: translateX(5px); }
+    75% { transform: translateX(-5px); }
+    100% { transform: translateX(0); }
+}
