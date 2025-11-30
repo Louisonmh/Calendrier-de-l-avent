@@ -34,9 +34,10 @@
         // 'image' est optionnel. Tu peux mettre une URL d'image.
         const riddles = {
             1: {
-                text: "Pour commencer en douceur... Je suis l'endroit où nous nous sommes embrassés pour la première fois.",
-                solution: "Regarde sous le coussin du canapé !",
-                image: "https://images.unsplash.com/photo-1518199266791-5375a83190b7?auto=format&fit=crop&w=500" // Exemple photo romantique
+                text: "BAHAHAHA J'espere tes choqué ! Voici ton premier défi ! https://www.jigsawplanet.com/?rc=play&pid=1de7c9e6df69",
+                image: "./img/Jour1.jng" // Exemple photo romantique
+                url: "https://www.jigsawplanet.com/?rc=play&pid=1de7c9e6df69", // 👈 Le lien du puzzle
+                buttonText: "Commencer le Puzzle 🧩"
             },
             2: {
                 text: "Une petite playlist pour ta journée.",
@@ -53,17 +54,24 @@
         const solEl = document.getElementById('solution');
         const mediaEl = document.getElementById('media-container');
 
-        if (content) {
-            titleEl.innerText = `Jour ${day}`;
-            textEl.innerHTML = content.text;
-            solEl.innerText = content.solution;
-
-            if (content.image) {
-                mediaEl.innerHTML = `<img src="${content.image}" style="max-width:100%; border-radius:10px; box-shadow:0 4px 10px rgba(0,0,0,0.2);">`;
-            }
-        } else {
-            titleEl.innerText = "Erreur";
-            textEl.innerText = "Pas de contenu pour ce jour.";
+        if (content.url) {
+                // CAS 1 : C'est un lien (Puzzle, Jeu...)
+                btn.innerText = content.buttonText || "Accéder au lien"; // Change le texte
+                btn.onclick = function() {
+                    window.open(content.url, '_blank'); // Ouvre le lien dans un nouvel onglet
+                };
+                // On cache la zone de texte solution car elle ne sert à rien ici
+                solEl.style.display = 'none'; 
+            } else {
+                // CAS 2 : C'est une énigme classique (Texte caché)
+                btn.innerText = "Voir l'indice / Solution";
+                solEl.innerText = content.solution;
+                
+                btn.onclick = function() {
+                    // Toggle simple
+                    solEl.style.display = (solEl.style.display === 'none') ? 'block' : 'none';
+                };
+            }  textEl.innerText = "Pas de contenu pour ce jour.";
         }
 
         function revealSolution() {
