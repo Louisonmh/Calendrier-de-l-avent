@@ -3,41 +3,181 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mon Calendrier de l'Avent</title>
-    <link rel="stylesheet" href="style.css">
+    <title>Calendrier de l'Avent</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400&family=Playfair+Display:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            /* Palette de couleurs extraite de ton image */
+            --bg-color: #F8F5F1;       /* Fond crème très clair */
+            --text-color: #4A4A4A;     /* Gris foncé doux */
+            
+            /* Les couleurs des cases (on va alterner) */
+            --box-beige: #E8E0D5;
+            --box-taupe: #A69B8F;
+            --box-sage: #6D7F70;       /* Vert sauge */
+            --box-light: #F0Ece6;
+            
+            --shadow: rgba(0, 0, 0, 0.1);
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: 'Lato', sans-serif;
+            margin: 0;
+            padding: 40px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        /* Titre Élégant */
+        header {
+            text-align: center;
+            margin-bottom: 50px;
+        }
+
+        h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.5rem;
+            font-weight: 400;
+            letter-spacing: 2px;
+            margin: 0;
+            text-transform: uppercase;
+            color: #3e3e3e;
+        }
+
+        .subtitle {
+            font-family: 'Lato', sans-serif;
+            font-size: 0.9rem;
+            color: #888;
+            margin-top: 10px;
+            letter-spacing: 1px;
+        }
+
+        /* La Grille */
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+            gap: 20px;
+            width: 100%;
+            max-width: 900px; /* Largeur max pour que ça ressemble à l'image */
+        }
+
+        /* Les Cases (Style Scandi) */
+        .day-box {
+            position: relative;
+            height: 100px; /* Carré */
+            border-radius: 2px; /* Coins très peu arrondis pour le style papier/bois */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            color: #333;
+            font-size: 1.8rem;
+            font-family: 'Playfair Display', serif; /* Chiffres élégants */
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            
+            /* Ombre portée douce pour l'effet relief */
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+
+        /* Effet "Trou" pour le doigt en haut de la case (le petit demi-cercle noir) */
+        .day-box::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 20px;
+            height: 10px;
+            background-color: rgba(60, 60, 60, 0.8);
+            border-bottom-left-radius: 20px;
+            border-bottom-right-radius: 20px;
+        }
+
+        .day-box:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 15px rgba(0,0,0,0.1);
+        }
+
+        /* --- DISTRIBUTION DES COULEURS (Algorithme CSS) --- */
+        /* On alterne les couleurs pour recréer le motif de l'image */
+        
+        /* 1. Beige clair (par défaut) */
+        .day-box { background-color: var(--box-light); }
+
+        /* 2. Taupe (tous les 3 éléments) */
+        .day-box:nth-child(3n) { 
+            background-color: var(--box-taupe); 
+            color: white; /* Texte blanc sur fond foncé */
+        }
+        
+        /* 3. Vert Sauge (tous les 4 éléments + décalage) */
+        .day-box:nth-child(4n+2) { 
+            background-color: var(--box-sage); 
+            color: white;
+        }
+
+        /* 4. Beige foncé (tous les 5 éléments) */
+        .day-box:nth-child(5n) { background-color: var(--box-beige); color: #333; }
+
+
+        /* --- ETAT VEROUILLÉ --- */
+        .locked {
+            opacity: 0.7;
+            cursor: not-allowed;
+            position: relative;
+        }
+        /* Enlever l'effet de survol si verrouillé */
+        .locked:hover { transform: none; box-shadow: none; }
+        
+        /* Cacher le numéro si on veut un effet mystère (optionnel, je le laisse affiché ici) */
+
+    </style>
 </head>
 <body>
-    <div class="snow"></div> <h1>🎄 Pour Ma Chérie 🎄</h1>
+
+    <header>
+        <h1>Calendrier de l'Avent</h1>
+        <div class="subtitle">DÉCEMBRE 2024 • POUR TOI</div>
+    </header>
     
-    <div class="container">
-        <div class="grid" id="calendar-grid">
-            </div>
-    </div>
+    <div class="grid-container" id="grid">
+        </div>
 
     <script>
-        const grid = document.getElementById('calendar-grid');
-        const today = new Date();
+        const grid = document.getElementById('grid');
         
-        // --- CONFIGURATION DEBUG ---
-        // Mets à 'false' quand tu mettras en ligne pour activer le verrouillage réel
-        const isDebugMode = true; 
+        // --- CONFIGURATION ---
+        // Mets à 'false' pour activer le vrai verrouillage par date
+        const debugMode = true; 
+        
+        const today = new Date();
+        const currentMonth = today.getMonth(); // 11 = Décembre
+        const currentDay = today.getDate();
 
+        // Génération des 24 cases
         for (let i = 1; i <= 24; i++) {
-            const card = document.createElement('a');
-            card.className = 'day-card';
-            card.innerHTML = `<div>${i}</div><div style="font-size:1rem; font-family:'Poppins'">Déc</div>`;
+            const link = document.createElement('a');
+            link.className = 'day-box';
+            link.innerText = i;
             
-            // Logique de verrouillage
-            const targetDate = new Date(today.getFullYear(), 11, i); // Mois 11 = Décembre
-            
-            if (!isDebugMode && (today.getMonth() !== 11 || today.getDate() < i)) {
-                card.classList.add('locked');
-                card.href = "#";
+            // Logique de lien
+            // Si Debug est OFF ET (ce n'est pas décembre OU le jour n'est pas arrivé)
+            if (!debugMode && (currentMonth !== 11 || i > currentDay)) {
+                link.classList.add('locked');
+                link.href = "javascript:void(0)"; // Bloque le lien
             } else {
-                card.href = `enigme.html?jour=${i}`;
+                link.href = `enigme.html?jour=${i}`;
             }
 
-            grid.appendChild(card);
+            grid.appendChild(link);
         }
     </script>
 </body>
